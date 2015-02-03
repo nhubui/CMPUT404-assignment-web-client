@@ -24,7 +24,6 @@ import socket
 import re
 # you may use urllib to encode data appropriately
 import urllib
-from urlparse import urlparse
 
 def help():
     print "httpclient.py [URL] [GET/POST]\n"
@@ -33,17 +32,27 @@ class HTTPRequest(object):
     def __init__(self, code=200, body=""):
         self.code = code
         self.body = body
+	#print('code = %s \nbody=%s')%(self.code,self.body)
 
 class HTTPClient(object):
     def get_host_path_port(self,url):
-	parse = urlparse(url)
-	host = parse.hostname
-	path = parse.path
-	port = parse.port
-	if port == None:
-		#Default to port 80, port 80 is the port 
-		#that the server "listens to" or expects to receive from a Web client
-		port = 80
+	#Default to port 80, port 80 is the port 
+	#that the server "listens to" or expects to receive from a Web client
+	port = 80
+	host =url.replace('http://', "")
+	path = "/"
+
+	#parsing the path from host if any
+	index = host.find('/')
+	if index != -1:
+		path = host[index:]
+		host = host[:index]
+	
+	#parsing the port from host if any
+	index = host.find(':')
+	if index != -1:
+		port = int(host[index+1:])
+		host = host[:index]
         return host, path, port
 
     def connect(self, host, port):
@@ -121,10 +130,12 @@ class HTTPClient(object):
 
         return HTTPRequest(code, body)
 
-    def POST(self, url, args=''):
+    def POST(self, url, args=None):
 	host, path, port = self.get_host_path_port(url)
-	if args!='':
+	if args != None:
 		args=urllib.urlencode(args)
+	else:
+		args = ''
 
 	#message to send to server
 	message ="POST %s HTTP/1.1 \r\n" %path
