@@ -92,7 +92,7 @@ class HTTPClient(object):
 	
 	#send server the HTTP call
 	try:
-		self.clientSocket.sendall(clientMsg)
+		self.clientSocket.sendall(clientMsg.encode("UTF8"))
 	except self.clientSocket as msg:
 		print('Error code: ' + str(msg[0]) + ', error message: ' + msg[1])
 		sys.exit()
